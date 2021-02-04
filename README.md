@@ -1,5 +1,7 @@
 # Quantum Leap Client Library for Python
 
+Quantum Leap Client Library for Python.
+
 ## Install
 
 ```bash
