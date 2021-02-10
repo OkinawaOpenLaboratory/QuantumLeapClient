@@ -16,18 +16,22 @@ class Client(object):
 
     def __init__(self, host='localhost', port=8668,
                  service=None, service_path=None):
+        self.host = host
+        self.port = port
         self.base_url = f'http://{host}:{port}/{self.version}'
         self.service = service
         self.service_path = service_path
         pass
 
-    def _do_request(self, method=None, url=None, queries=None, body=None):
+    def _do_request(self, method=None, url=None,
+                    queries=None, body=None, headers=None):
         if method == 'POST':
-            response = requests.post(url,
+            response = requests.post(url, params=queries,
                                      data=json.dumps(body),
-                                     headers={"Content-Type":
-                                              "application/json"})
+                                     headers=headers)
             if response.status_code == 200:
+                return{"status": "Notification successfully processed"}
+            elif response.status_code == 201:
                 return{"status": "Notification successfully processed"}
             elif response.status_code == 400:
                 return{"status": "Received notification is not valid"}
@@ -91,16 +95,81 @@ class Client(object):
             params['aggrScope'] = aggrScope
         return params
 
+    def wrap_subscribe_params(self, queries):
+        params = {}
+        if 'orionUrl' in queries:
+            params['orionUrl'] = queries['orionUrl']
+        else:
+            params['orionUrl'] = 'http://localhost:1026/v2'
+        if 'quantumleapUrl' in queries:
+            params['quantumleapUrl'] = queries['quantumleapUrl']
+        else:
+            params['quantumleapUrl'] = f'{self.base_url}'
+        if 'entityType' in queries:
+            params['entityType'] = queries['entityType']
+        if 'entityId' in queries:
+            params['entityId'] = queries['entityId']
+        if 'idPattern' in queries:
+            params['idPattern'] = queries['idPattern']
+        if 'attributes' in queries:
+            params['attributes'] = queries['attributes']
+        if 'observedAttributes' in queries:
+            params['obervedAttributes'] = queries['observedAttributes']
+        if 'notifiedAttributes' in queries:
+            params['notifiedAttributes'] = queries['notifiedAttributes']
+        if 'throttlinf' in queries:
+            params['throttling'] = queries['throttling']
+        if 'timeIndexAttribute' in queries:
+            params['timeIndexAttribute'] = queries['timeIndexAttribute']
+        return params
+
+    def get_version(self):
+        url = f'http://{self.host}:{self.port}/version'
+        response = self._do_request(method='GET', url=url)
+        return response
+
+    def post_config(self, type=None, replicas=None):
+        url = f'{self.base_url}/config'
+        params = {}
+        if type:
+            params['type'] = type
+        if replicas:
+            params['replicas'] = replicas
+        response = self._do_request(method='POST', url=url,
+                                    queries=params)
+        return response
+
+    def get_health(self):
+        url = f'http://{self.host}:{self.port}/health'
+        response = self._do_request(method='GET', url=url)
+        return response
+
     def post_notify(self, body):
         url = f'{self.base_url}/notify'
-        responce = self._do_request(method="POST", url=url, body=body)
+        responce = self._do_request(method="POST", url=url, body=body,
+                                    headers={"Content-Type":
+                                             "application/json"})
         return responce
 
-    def delete_entity(self, entity_id: str, type=None,
-                      fromDate=None, toDate=None):
+    def post_subscription(self, **kwargs):
+        url = f'{self.base_url}/subscribe'
+        params = self.wrap_subscribe_params(queries=kwargs)
+        response = self._do_request(method='POST', url=url,
+                                    queries=params)
+        return response
+
+    def delete_entity_id(self, entity_id: str, type=None,
+                         fromDate=None, toDate=None):
         url = f'{self.base_url}/entities/{entity_id}'
         params = self.wrap_params(type=type, fromDate=fromDate,
                                   toDate=toDate)
+        response = self._do_request(method='DELETE', url=url, queries=params)
+        return response
+
+    def delete_entity_type(self, entity_type: str, fromDate=None,
+                           toDate=None):
+        url = f'{self.base_url}/types/{entity_type}'
+        params = self.wrap_params(fromDate=fromDate, toDate=toDate)
         response = self._do_request(method='DELETE', url=url, queries=params)
         return response
 
@@ -241,8 +310,8 @@ class Client(object):
     def get_attribute_value(self, attr_name: str, type=None, id=None,
                             aggrMethod=None, aggrPeriod=None, aggrScope=None,
                             options=None, fromDate=None, toDate=None,
-                            lastN=None, limit=None, offset=None, georel=georel,
-                            geometory=geometory, coords=coords):
+                            lastN=None, limit=None, offset=None, georel=None,
+                            geometory=None, coords=None):
         url = '{self.base_url}/attrs/{attr_name}/value'
         params = self.wrap_params(type=type, id=id, aggrMethod=aggrMethod,
                                   aggrPeriod=aggrPeriod, aggrScope=aggrScope,
@@ -255,8 +324,8 @@ class Client(object):
 
     def get_attrs(self, type=None, id=None, aggrMethod=None, aggrPeriod=None,
                   aggrScope=None, options=None, fromDate=None, toDate=None,
-                  lastN=None, limit=None, offset=None, georel=georel,
-                  geometory=geometory, coords=coords):
+                  lastN=None, limit=None, offset=None, georel=None,
+                  geometory=None, coords=None):
         url = '{self.base_url}/attrs'
         params = self.wrap_params(type=type, id=id, aggrMethod=aggrMethod,
                                   aggrPeriod=aggrPeriod, aggrScope=aggrScope,
@@ -270,8 +339,8 @@ class Client(object):
     def get_attrs_value(self, type=None, id=None, aggrMethod=None,
                         aggrPeriod=None, aggrScope=None, options=None,
                         fromDate=None, toDate=None, lastN=None,
-                        limit=None, offset=None, georel=georel,
-                        geometory=geometory, coords=coords):
+                        limit=None, offset=None, georel=None,
+                        geometory=None, coords=None):
         url = '{self.base_url}/attrs/value'
         params = self.wrap_params(type=type, id=id, aggrMethod=aggrMethod,
                                   aggrPeriod=aggrPeriod, aggrScope=aggrScope,
