@@ -33,6 +33,202 @@ class Client(object):
         logger.info(f'base_url = {self.base_url}')
         pass
 
+    def combine_index(self, res_index, response_index):
+        index_list = []
+        index_list.extend(response_index)
+        index_list.extend(res_index)
+        return index_list
+
+    def combine_values(self, res_values, response_values):
+        values_list = []
+        values_list.extend(response_values)
+        values_list.extend(res_values)
+        return values_list
+
+    def combine_attributes(self, res_attributes, response_attributes):
+        attributes_list = []
+        for res_attribute in res_attributes:
+            attribute = {}
+            for response_attribute in response_attributes:
+                if res_attribute["attrName"] == response_attribute["attrName"]:
+                    attribute["attrName"] = res_attribute["attrName"]
+                    attribute["values"] = self.combine_values(
+                        res_attribute["values"], response_attribute["values"])
+                    break
+            if "attrName" in attribute:
+                attributes_list.append(attribute)
+            else:
+                attributes_list.append(res_attribute)
+        for response_attribute in response_attributes:
+            attribute = {}
+            for res_attribute in res_attributes:
+                if response_attribute["attrName"] == res_attribute["attrName"]:
+                    attribute["attrName"] = response_attribute["attrName"]
+                    break
+            if "attrName" not in attribute:
+                attributes_list.append(response_attribute)
+        return sorted(attributes_list, key=lambda x: x["attrName"])
+
+    def combine_entities(self, res_entities, response_entities):
+        entities_list = []
+        if "values" in response_entities:
+            for res_entity in res_entities:
+                entity = {}
+                for response_entity in response_entities:
+                    if res_entity["entityId"] == response_entity["entityId"]:
+                        entity["entityId"] = res_entity["entityId"]
+                        entity["index"] = self.combine_index(
+                            res_entity["index"], response_entity["index"])
+                        entity["values"] = self.combine_values(
+                            res_entity["values"], response_entity["values"])
+                        break
+                if "entityId" in entity:
+                    entities_list.append(entity)
+                else:
+                    entities_list.append(res_entity)
+            for response_entity in response_entities:
+                entity = {}
+                for res_entity in res_entities:
+                    if response_entity["entityId"] == res_entity["entityId"]:
+                        entity["entityId"] = response_entity["entityId"]
+                        break
+                if "entityId" not in entity:
+                    entities_list.append(response_entity)
+        else:
+            for res_entity in res_entities:
+                entity = {}
+                for response_entity in response_entities:
+                    if res_entity["entityId"] == response_entity["entityId"]:
+                        entity["entitytId"] = res_entity["entityId"]
+                        entity["index"] = self.combine_index(
+                            res_entity["index"], response_entity["index"])
+                        entity["attributes"] = self.combine_attributes(
+                            res_entity["attributes"],
+                            response_entity["attributes"])
+                        break
+                if "entityId" in entity:
+                    entities_list.append(entity)
+                else:
+                    entities_list.append(res_entity)
+            for response_entity in response_entities:
+                entitiy = {}
+                for res_entity in res_entities:
+                    if response_entity["entityId"] == res_entity["entityId"]:
+                        entity["entityId"] = response_entity["entityId"]
+                        break
+                if "entityId" not in entity:
+                    entities_list.append(response_entity)
+        return sorted(entities_list, key=lambda x: x["entityId"])
+
+    def combine_types(self, res_types, response_types):
+        types_list = []
+        for res_type in res_types:
+            entity_type = {}
+            for response_type in response_types:
+                if res_type["entityType"] == response_type["entityType"]:
+                    entity_type["entityType"] = res_type["entityType"]
+                    res_entities = res_type["entities"]
+                    response_entities = response_type["entities"]
+                    entity["entities"] = self.combine_entities(
+                        res_entities, response_entities)
+                    break
+            if "entityType" in entity_type:
+                types_list.append(entity_type)
+            else:
+                types_list.append(res_type)
+        for response_type in response_types:
+            entity_type = {}
+            for res_type in res_types:
+                if response_type["entityType"] == res_type["entityType"]:
+                    entity_type["entityType"] = response_type["entityType"]
+                    break
+            if "entityType" not in entity_type:
+                types_list.append(types_list)
+        return sorted(types_list, key=lambda x: x["entityType"])
+
+    def combine_attrs(self, res_attrs, response_attrs):
+        attrs_list = []
+        for res_attr in res_attrs:
+            attr = {}
+            for response_attr in response_attrs:
+                if res_attr["attrName"] == response_attr["attrName"]:
+                    attr["attrName"] = res_attr["attrName"]
+                    res_types = res_attr["types"]
+                    response_types = response_attr["types"]
+                    attr["types"] = self.combine_types(
+                        res_types, response_types)
+                    break
+            if "attrName" in attr:
+                attr_list.append(attr)
+            else:
+                attr_list.append(res_attr)
+        for response_attr in response_attrs:
+            attr = {}
+            for res_attr in res_attrs:
+                if response_attr["attrName"] == res_attr["attrName"]:
+                    attr["attrName"] = response_attr["attrName"]
+                    break
+            if "attrName" not in attr:
+                attr_list.append(response_attr)
+        return sorted(attrs_list, key=lambda x: x["attrName"])
+
+    def combine_response(self, res, response):
+        combine_response = {}
+        if "attrName" in res:
+            combine_response["attrName"] = res["attrName"]
+        if "entityId" in res:
+            combine_response["entityId"] = res["entityId"]
+        if "index" in res:
+            if "index" in response:
+                combine_response["index"] = self.combine_index(
+                    res["index"], response["index"])
+            else:
+                combine_response["index"] = res["index"]
+        if "values" in res:
+            if "values" in response:
+                values_check = res["values"]
+                if "entityId" in values_check[0]:
+                    combine_response["values"] = self.combine_entities(
+                        res["values"], response["values"])
+                elif "entities" in values_check[0]:
+                    combine_response["values"] = self.combine_types(
+                        res["values"], response["values"])
+                elif "types" in values_check[0]:
+                    combine_response["values"] = self.combine_attrs(
+                        res["values"], response["values"])
+                else:
+                    combine_response["values"] = self.combine_values(
+                        res["values"], response["values"])
+            else:
+                combine_response["values"] = res["values"]
+        if "attributes" in res:
+            if "attributes" in response:
+                combine_response["attributes"] = self.combine_attributes(
+                    res["attributes"], response["attributes"])
+            else:
+                combine_response["attributes"] = res["attributes"]
+        if "entities" in res:
+            if "entities" in response:
+                combine_response["entities"] = self.combine_entities(
+                    res["entities"], response["entities"])
+            else:
+                combine_response["entities"] = res["entities"]
+        if "entityType" in res:
+            combine_response["entityType"] = res["entityType"]
+        if "types" in res:
+            if "types" in response:
+                combine_response["types"] = self.combine_types(
+                    res["types"], response["types"])
+            else:
+                combine_response["types"] = res["types"]
+        if "attrs" in res:
+            if "attrs" in response:
+                combine_response["attrs"] = self.combine_attrs(
+                    res["attrs"], response["attrs"])
+            else:
+                combine_response["attrs"] = res["attrs"]
+        return combine_response
+
     def _do_request(self, method=None, url=None,
                     queries=None, body=None, headers=None):
         logger.info("start _do_request function")
@@ -74,21 +270,78 @@ class Client(object):
                 raise QuantumLeapClientException(
                     status=status, message=message)
         else:
-            try:
-                res = requests.get(url, params=queries)
-                res.raise_for_status()
-                logger.info(
-                    f'status:{res.status_code}|message:OK')
-                response = res.json()
+            if queries is None:
+                try:
+                    response = requests.get(url)
+                    response.raise_for_status()
+                    logger.info(
+                        f'status:{response.status_code}|'
+                        'message:Successful response.')
+                    return response.json()
+                except requests.exceptions.RequestException as e:
+                    status = response.status_code
+                    if status == 404:
+                        message = "Not Found"
+                    else:
+                        message = "Error"
+                    raise QuantumLeapClientException(
+                        status=status, message=message)
+            elif "limit" not in queries:
+                queries["limit"] = 10000
+                response = {}
+                while True:
+                    resp = requests.get(url, params=queries)
+                    res = resp.json()
+                    if resp.status_code == 200:
+                        logger.info(
+                            f'status:{resp.status_code}'
+                            'message: Successful response.'
+                        response = self.combine_response(
+                            res=res, response=response)
+                        if "offset" in queries:
+                            queries["offset"] += queries["limit"]
+                        else:
+                            queries["offset"] = queries["limit"]
+                    else:
+                        logger.info(
+                            f'status:{resp.status_code}|'
+                            'message:End roop process')
+                        break
                 return response
-            except requests.exceptions.RequestException as e:
-                status = res.status_code
-                if status == 404:
-                    message = "Not Found"
-                elif status == 501:
-                    message = "Not implemented"
-                raise QuantumLeapClientException(
-                    status=status, message=message)
+            elif queries["limit"] <= 10000:
+                try:
+                    response = requests.get(url, params=queries)
+                    response.raise_for_status()
+                    logger.info(
+                        f'status:{response.status_code}|'
+                        'message:Successful response.')
+                    return response.json()
+                except requests.exceptions.RequestException as e:
+                    status = response.status_code
+                    if status == 404:
+                        message = "Not Found"
+                    else:
+                        message = "Error"
+                    raise QuantumLeapClientException(
+                        status=status, message=message)
+            else:
+                loop_count = queries["limit"] // 10000
+                init_limit = queries["limit"] % 10000
+                queries["limit"] = init_limit
+                resp = request.get(url. params=queries)
+                response = resp.json()
+                if "offset" in queries:
+                    queries["offset"] += queries["limit"]
+                else:
+                    queries["offset"] = queries["limit"]
+                queries["limit"] = 10000
+                for i in range(loop_count):
+                    resp = requests.get(url. params=queries)
+                    res = resp.json()
+                    response = self.combine_response(
+                        res=res, response=response)
+                    queries["offset"] += queries["limit"]
+                return response
 
     def wrap_params(self, queries):
         logger.info("start wrap parameters")
