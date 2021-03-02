@@ -6,7 +6,6 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 fmt = "%(asctime)s|%(levelname)s |%(name)s:%(funcName)s:%(lineno)s-%(message)s"
-logging.basicConfig(level=logging.DEBUG, format=fmt)
 
 
 class QuantumLeapClientException(Exception):
@@ -20,18 +19,17 @@ class QuantumLeapClientException(Exception):
 
 
 class Client(object):
-    logger.debug("init Client")
-    version = "v2"
 
-    def __init__(self, host='localhost', port=8668,
-                 service=None, service_path=None):
+    def __init__(self, host='localhost', port=8668, service=None,
+                 service_path=None, log_level=logging.INFO):
+        logger.debug("init Client")
         self.host = host
         self.port = port
-        self.base_url = f'http://{host}:{port}/{self.version}'
+        self.base_url = f'http://{host}:{port}/v2'
         self.service = service
         self.service_path = service_path
+        logging.basicConfig(level=log_level, format=fmt)
         logger.info(f'base_url = {self.base_url}')
-        pass
 
     def __append_index(self, index1, index2):
         index_list = []
