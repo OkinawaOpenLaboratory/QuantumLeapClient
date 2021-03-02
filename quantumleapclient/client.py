@@ -208,7 +208,7 @@ class Client(object):
             else:
                 __append_response["attributes"] = response1["attributes"]
         if "entities" in response1:
-            if "entities" in response:
+            if "entities" in response2:
                 __append_response["entities"] = self.__append_entities(
                     response1["entities"], response2["entities"])
             else:
@@ -410,7 +410,7 @@ class Client(object):
             params['obervedAttributes'] = queries['observedAttributes']
         if 'notifiedAttributes' in queries:
             params['notifiedAttributes'] = queries['notifiedAttributes']
-        if 'throttlinf' in queries:
+        if 'throttling' in queries:
             params['throttling'] = queries['throttling']
         if 'timeIndexAttribute' in queries:
             params['timeIndexAttribute'] = queries['timeIndexAttribute']
@@ -509,9 +509,10 @@ class Client(object):
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
-    def get_type_attribute_value(self, **kwargs):
+    def get_type_attribute_value(self, entity_type: str,
+                                 attr_name: str, **kwargs):
         logger.info("start get_type_attribute_value function")
-        url = f'{self.base_url}/types/{entity_type}/value'
+        url = f'{self.base_url}/types/{entity_type}/attrs/{attr_name}value'
         params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
@@ -532,28 +533,28 @@ class Client(object):
 
     def get_attribute(self, attr_name: str, **kwargs):
         logger.info("start get_attribute function")
-        url = '{self.base_url}/attrs/{attr_name}'
-        params = self.__wrap_params(queries=keargs)
+        url = f'{self.base_url}/attrs/{attr_name}'
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_attribute_value(self, attr_name: str, **kwargs):
         logger.info("start get_attribute_value")
-        url = '{self.base_url}/attrs/{attr_name}/value'
+        url = f'{self.base_url}/attrs/{attr_name}/value'
         params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_attrs(self, **kwargs):
         logger.info("start get_attrs function")
-        url = '{self.base_url}/attrs'
+        url = f'{self.base_url}/attrs'
         params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_attrs_value(self, **kwargs):
         logger.info("start get_attrs function")
-        url = '{self.base_url}/attrs/value'
+        url = f'{self.base_url}/attrs/value'
         params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
