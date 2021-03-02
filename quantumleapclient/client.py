@@ -33,201 +33,201 @@ class Client(object):
         logger.info(f'base_url = {self.base_url}')
         pass
 
-    def combine_index(self, res_index, response_index):
+    def __append_index(self, index1, index2):
         index_list = []
-        index_list.extend(response_index)
-        index_list.extend(res_index)
+        index_list.extend(index1)
+        index_list.extend(index2)
         return index_list
 
-    def combine_values(self, res_values, response_values):
+    def __append_values(self, values1, values2):
         values_list = []
-        values_list.extend(response_values)
-        values_list.extend(res_values)
+        values_list.extend(values1)
+        values_list.extend(values2)
         return values_list
 
-    def combine_attributes(self, res_attributes, response_attributes):
+    def __append_attributes(self, attributes1, attributes2):
         attributes_list = []
-        for res_attribute in res_attributes:
+        for attribute1 in attributes1:
             attribute = {}
-            for response_attribute in response_attributes:
-                if res_attribute["attrName"] == response_attribute["attrName"]:
-                    attribute["attrName"] = res_attribute["attrName"]
-                    attribute["values"] = self.combine_values(
-                        res_attribute["values"], response_attribute["values"])
+            for attribute2 in attributes2:
+                if attribute1["attrName"] == attribute2["attrName"]:
+                    attribute["attrName"] = attribute1["attrName"]
+                    attribute["values"] = self.__append_values(
+                        attribute1["values"], attribute2["values"])
                     break
             if "attrName" in attribute:
                 attributes_list.append(attribute)
             else:
-                attributes_list.append(res_attribute)
-        for response_attribute in response_attributes:
+                attributes_list.append(attribute1)
+        for attribute2 in attributes2:
             attribute = {}
-            for res_attribute in res_attributes:
-                if response_attribute["attrName"] == res_attribute["attrName"]:
-                    attribute["attrName"] = response_attribute["attrName"]
+            for attribute1 in attributes1:
+                if attribute2["attrName"] == attribute1["attrName"]:
+                    attribute["attrName"] = attribute2["attrName"]
                     break
             if "attrName" not in attribute:
-                attributes_list.append(response_attribute)
+                attributes_list.append(attribute2)
         return sorted(attributes_list, key=lambda x: x["attrName"])
 
-    def combine_entities(self, res_entities, response_entities):
+    def __append_entities(self, entities1, entities2):
         entities_list = []
-        if "values" in response_entities:
-            for res_entity in res_entities:
+        if "values" in entities2:
+            for entity1 in entities1:
                 entity = {}
-                for response_entity in response_entities:
-                    if res_entity["entityId"] == response_entity["entityId"]:
-                        entity["entityId"] = res_entity["entityId"]
-                        entity["index"] = self.combine_index(
-                            res_entity["index"], response_entity["index"])
-                        entity["values"] = self.combine_values(
-                            res_entity["values"], response_entity["values"])
+                for entity2 in entities2:
+                    if entity1["entityId"] == entity2["entityId"]:
+                        entity["entityId"] = entity1["entityId"]
+                        entity["index"] = self.__append_index(
+                            entity1["index"], entity2["index"])
+                        entity["values"] = self.__append_values(
+                            entity1["values"], entity2["values"])
                         break
                 if "entityId" in entity:
                     entities_list.append(entity)
                 else:
-                    entities_list.append(res_entity)
-            for response_entity in response_entities:
+                    entities_list.append(entity1)
+            for entity2 in entities2:
                 entity = {}
-                for res_entity in res_entities:
-                    if response_entity["entityId"] == res_entity["entityId"]:
-                        entity["entityId"] = response_entity["entityId"]
+                for entity1 in entities1:
+                    if entity2["entityId"] == entity1["entityId"]:
+                        entity["entityId"] = entity2["entityId"]
                         break
                 if "entityId" not in entity:
-                    entities_list.append(response_entity)
+                    entities_list.append(entity2)
         else:
-            for res_entity in res_entities:
+            for entity1 in entities1:
                 entity = {}
-                for response_entity in response_entities:
-                    if res_entity["entityId"] == response_entity["entityId"]:
-                        entity["entitytId"] = res_entity["entityId"]
-                        entity["index"] = self.combine_index(
-                            res_entity["index"], response_entity["index"])
-                        entity["attributes"] = self.combine_attributes(
-                            res_entity["attributes"],
-                            response_entity["attributes"])
+                for entity2 in entities2:
+                    if entity1["entityId"] == entity2["entityId"]:
+                        entity["entitytId"] = entity1["entityId"]
+                        entity["index"] = self.__append_index(
+                            entity1["index"], entity2["index"])
+                        entity["attributes"] = self.__append_attributes(
+                            entity1["attributes"],
+                            entity2["attributes"])
                         break
                 if "entityId" in entity:
                     entities_list.append(entity)
                 else:
-                    entities_list.append(res_entity)
-            for response_entity in response_entities:
+                    entities_list.append(entity1)
+            for entity2 in entities2:
                 entitiy = {}
-                for res_entity in res_entities:
-                    if response_entity["entityId"] == res_entity["entityId"]:
-                        entity["entityId"] = response_entity["entityId"]
+                for entity1 in entities1:
+                    if entity2["entityId"] == entity1["entityId"]:
+                        entity["entityId"] = entity2["entityId"]
                         break
                 if "entityId" not in entity:
-                    entities_list.append(response_entity)
+                    entities_list.append(entity2)
         return sorted(entities_list, key=lambda x: x["entityId"])
 
-    def combine_types(self, res_types, response_types):
+    def __append_types(self, types1, types2):
         types_list = []
-        for res_type in res_types:
+        for type1 in types1:
             entity_type = {}
-            for response_type in response_types:
-                if res_type["entityType"] == response_type["entityType"]:
-                    entity_type["entityType"] = res_type["entityType"]
-                    res_entities = res_type["entities"]
-                    response_entities = response_type["entities"]
-                    entity["entities"] = self.combine_entities(
-                        res_entities, response_entities)
+            for type2 in types2:
+                if type1["entityType"] == type2["entityType"]:
+                    entity_type["entityType"] = type1["entityType"]
+                    entities1 = type1["entities"]
+                    entities2 = type2["entities"]
+                    entity["entities"] = self.__append_entities(
+                        entities1, entities2)
                     break
             if "entityType" in entity_type:
                 types_list.append(entity_type)
             else:
-                types_list.append(res_type)
-        for response_type in response_types:
+                types_list.append(type1)
+        for type2 in types2:
             entity_type = {}
-            for res_type in res_types:
-                if response_type["entityType"] == res_type["entityType"]:
-                    entity_type["entityType"] = response_type["entityType"]
+            for type1 in types1:
+                if type2["entityType"] == type1["entityType"]:
+                    entity_type["entityType"] = type2["entityType"]
                     break
             if "entityType" not in entity_type:
                 types_list.append(types_list)
         return sorted(types_list, key=lambda x: x["entityType"])
 
-    def combine_attrs(self, res_attrs, response_attrs):
+    def __append_attrs(self, attrs1, attrs2):
         attrs_list = []
-        for res_attr in res_attrs:
+        for attr1 in attrs1:
             attr = {}
-            for response_attr in response_attrs:
-                if res_attr["attrName"] == response_attr["attrName"]:
-                    attr["attrName"] = res_attr["attrName"]
-                    res_types = res_attr["types"]
-                    response_types = response_attr["types"]
-                    attr["types"] = self.combine_types(
-                        res_types, response_types)
+            for attr2 in attrs2:
+                if attr1["attrName"] == attr2["attrName"]:
+                    attr["attrName"] = attr1["attrName"]
+                    types1 = attr1["types"]
+                    types2 = attr2["types"]
+                    attr["types"] = self.__append_types(
+                        types1, types2)
                     break
             if "attrName" in attr:
                 attr_list.append(attr)
             else:
-                attr_list.append(res_attr)
-        for response_attr in response_attrs:
+                attr_list.append(attr1)
+        for attr2 in attrs2:
             attr = {}
-            for res_attr in res_attrs:
-                if response_attr["attrName"] == res_attr["attrName"]:
-                    attr["attrName"] = response_attr["attrName"]
+            for attr1 in attrs1:
+                if attr2["attrName"] == attr1["attrName"]:
+                    attr["attrName"] = attr2["attrName"]
                     break
             if "attrName" not in attr:
-                attr_list.append(response_attr)
+                attr_list.append(attr2)
         return sorted(attrs_list, key=lambda x: x["attrName"])
 
-    def combine_response(self, res, response):
-        combine_response = {}
-        if "attrName" in res:
-            combine_response["attrName"] = res["attrName"]
-        if "entityId" in res:
-            combine_response["entityId"] = res["entityId"]
-        if "index" in res:
-            if "index" in response:
-                combine_response["index"] = self.combine_index(
-                    res["index"], response["index"])
+    def __append_response(self, response1, response2):
+        __append_response = {}
+        if "attrName" in response1:
+            __append_response["attrName"] = response1["attrName"]
+        if "entityId" in response1:
+            __append_response["entityId"] = response1["entityId"]
+        if "index" in response1:
+            if "index" in response2:
+                __append_response["index"] = self.__append_index(
+                    response1["index"], response2["index"])
             else:
-                combine_response["index"] = res["index"]
-        if "values" in res:
-            if "values" in response:
-                values_check = res["values"]
+                __append_response["index"] = response1["index"]
+        if "values" in response1:
+            if "values" in response2:
+                values_check = response1["values"]
                 if "entityId" in values_check[0]:
-                    combine_response["values"] = self.combine_entities(
-                        res["values"], response["values"])
+                    __append_response["values"] = self.__append_entities(
+                        response1["values"], response2["values"])
                 elif "entities" in values_check[0]:
-                    combine_response["values"] = self.combine_types(
-                        res["values"], response["values"])
+                    __append_response["values"] = self.__append_types(
+                        response1["values"], response2["values"])
                 elif "types" in values_check[0]:
-                    combine_response["values"] = self.combine_attrs(
-                        res["values"], response["values"])
+                    __append_response["values"] = self.__append_attrs(
+                        response1["values"], response2["values"])
                 else:
-                    combine_response["values"] = self.combine_values(
-                        res["values"], response["values"])
+                    __append_response["values"] = self.__append_values(
+                        response1["values"], response2["values"])
             else:
-                combine_response["values"] = res["values"]
-        if "attributes" in res:
-            if "attributes" in response:
-                combine_response["attributes"] = self.combine_attributes(
-                    res["attributes"], response["attributes"])
+                __append_response["values"] = response1["values"]
+        if "attributes" in response1:
+            if "attributes" in response2:
+                __append_response["attributes"] = self.__append_attributes(
+                    response1["attributes"], response2["attributes"])
             else:
-                combine_response["attributes"] = res["attributes"]
-        if "entities" in res:
+                __append_response["attributes"] = response1["attributes"]
+        if "entities" in response1:
             if "entities" in response:
-                combine_response["entities"] = self.combine_entities(
-                    res["entities"], response["entities"])
+                __append_response["entities"] = self.__append_entities(
+                    response1["entities"], response2["entities"])
             else:
-                combine_response["entities"] = res["entities"]
-        if "entityType" in res:
-            combine_response["entityType"] = res["entityType"]
-        if "types" in res:
-            if "types" in response:
-                combine_response["types"] = self.combine_types(
-                    res["types"], response["types"])
+                __append_response["entities"] = response1["entities"]
+        if "entityType" in response1:
+            __append_response["entityType"] = response1["entityType"]
+        if "types" in response1:
+            if "types" in response2:
+                __append_response["types"] = self.__append_types(
+                    response1["types"], response2["types"])
             else:
-                combine_response["types"] = res["types"]
-        if "attrs" in res:
-            if "attrs" in response:
-                combine_response["attrs"] = self.combine_attrs(
-                    res["attrs"], response["attrs"])
+                __append_response["types"] = response1["types"]
+        if "attrs" in response1:
+            if "attrs" in response2:
+                __append_response["attrs"] = self.__append_attrs(
+                    response1["attrs"], response2["attrs"])
             else:
-                combine_response["attrs"] = res["attrs"]
-        return combine_response
+                __append_response["attrs"] = response1["attrs"]
+        return __append_response
 
     def _do_request(self, method=None, url=None,
                     queries=None, body=None, headers=None):
@@ -288,26 +288,26 @@ class Client(object):
                         status=status, message=message)
             elif "limit" not in queries:
                 queries["limit"] = 10000
-                response = {}
+                append_response = {}
                 while True:
-                    resp = requests.get(url, params=queries)
-                    res = resp.json()
-                    if resp.status_code == 200:
+                    response = requests.get(url, params=queries)
+                    response_dict = response.json()
+                    if response.status_code == 200:
                         logger.info(
-                            f'status:{resp.status_code}'
-                            'message: Successful response.'
-                        response = self.combine_response(
-                            res=res, response=response)
+                            f'status:{response.status_code}'
+                            'message: Successful response.')
+                        append_response = self.__append_response(
+                            response_dict, append_response)
                         if "offset" in queries:
                             queries["offset"] += queries["limit"]
                         else:
                             queries["offset"] = queries["limit"]
                     else:
                         logger.info(
-                            f'status:{resp.status_code}|'
+                            f'status:{response.status_code}|'
                             'message:End roop process')
                         break
-                return response
+                return append_response
             elif queries["limit"] <= 10000:
                 try:
                     response = requests.get(url, params=queries)
@@ -328,22 +328,22 @@ class Client(object):
                 loop_count = queries["limit"] // 10000
                 init_limit = queries["limit"] % 10000
                 queries["limit"] = init_limit
-                resp = request.get(url. params=queries)
-                response = resp.json()
+                response = request.get(url, params=queries)
+                __append_response = resp.json()
                 if "offset" in queries:
                     queries["offset"] += queries["limit"]
                 else:
                     queries["offset"] = queries["limit"]
                 queries["limit"] = 10000
                 for i in range(loop_count):
-                    resp = requests.get(url. params=queries)
-                    res = resp.json()
-                    response = self.combine_response(
-                        res=res, response=response)
+                    response = requests.get(url, params=queries)
+                    response_dict = response.json()
+                    append_response = self.__append_response(
+                        response_dict, append_response)
                     queries["offset"] += queries["limit"]
-                return response
+                return append_response
 
-    def wrap_params(self, queries):
+    def __wrap_params(self, queries):
         logger.info("start wrap parameters")
         params = {}
         if 'type' in queries:
@@ -387,7 +387,7 @@ class Client(object):
         logger.info(f'params={params}')
         return params
 
-    def wrap_subscribe_params(self, queries):
+    def __wrap_subscribe_params(self, queries):
         logger.info("start wrap parameters for subscription")
         params = {}
         if 'orionUrl' in queries:
@@ -454,7 +454,7 @@ class Client(object):
     def post_subscription(self, **kwargs):
         logger.info("start post_subscription")
         url = f'{self.base_url}/subscribe'
-        params = self.wrap_subscribe_params(queries=kwargs)
+        params = self.__wrap_subscribe_params(queries=kwargs)
         response = self._do_request(method='POST', url=url,
                                     queries=params)
         return response
@@ -462,21 +462,21 @@ class Client(object):
     def delete_entity_id(self, entity_id: str, **kwargs):
         logger.info("start delete_entity_id function")
         url = f'{self.base_url}/entities/{entity_id}'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='DELETE', url=url, queries=params)
         return response
 
     def delete_entity_type(self, entity_type: str, **kwargs):
         logger.info("start delete_entity_type function")
         url = f'{self.base_url}/types/{entity_type}'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='DELETE', url=url, queries=params)
         return response
 
     def get_entity_attribute(self, entity_id: str, attr_name: str, **kwargs):
         logger.info("start get_entity_attribute function")
         url = f'{self.base_url}/entities/{entity_id}/attrs/{attr_name}'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
@@ -484,76 +484,76 @@ class Client(object):
                                    **kwargs):
         logger.info("start get_entity_attribute_value function")
         url = f'{self.base_url}/entities/{entity_id}/attrs/{attr_name}/value'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_entity(self, entity_id: str, **kwargs):
         logger.info("start get_entity function")
         url = f'{self.base_url}/entities/{entity_id}'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_entity_value(self, entity_id: str, **kwargs):
         logger.info("start get_entity_value function")
         url = f'{self.base_url}/entities/{entity_id}/value'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_type_attribute(self, entity_type: str, attr_name: str, **kwargs):
         logger.info("start get_type_attribute function")
         url = f'{self.base_url}/types/{entity_type}/attrs/{attr_name}'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_type_attribute_value(self, **kwargs):
         logger.info("start get_type_attribute_value function")
         url = f'{self.base_url}/types/{entity_type}/value'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_type(self, entity_type: str, **kwargs):
         logger.info("start get_type functioin")
         url = f'{self.base_url}/types/{entity_type}'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_type_value(self, entity_type: str, **kwargs):
         logger.info("start get_type_value function")
         url = f'{self.base_url}/types/{entity_type}/value'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_attribute(self, attr_name: str, **kwargs):
         logger.info("start get_attribute function")
         url = '{self.base_url}/attrs/{attr_name}'
-        params = self.wrap_params(queries=keargs)
+        params = self.__wrap_params(queries=keargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_attribute_value(self, attr_name: str, **kwargs):
         logger.info("start get_attribute_value")
         url = '{self.base_url}/attrs/{attr_name}/value'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_attrs(self, **kwargs):
         logger.info("start get_attrs function")
         url = '{self.base_url}/attrs'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
 
     def get_attrs_value(self, **kwargs):
         logger.info("start get_attrs function")
         url = '{self.base_url}/attrs/value'
-        params = self.wrap_params(queries=kwargs)
+        params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
