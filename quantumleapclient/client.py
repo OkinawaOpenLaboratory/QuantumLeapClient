@@ -348,7 +348,7 @@ class Client(object):
         if 'fromDate' in queries:
             fromDate = queries['fromDate']
             if isinstance(fromDate, datetime):
-                self.fromDate = fromdate.strftime('%Y-%m-%dT%H:%M:%SZ')
+                self.fromDate = fromDate.strftime('%Y-%m-%dT%H:%M:%SZ')
                 params['fromDate'] = self.fromDate
             else:
                 params['fromDate'] = queries['fromDate']
