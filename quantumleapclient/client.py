@@ -62,7 +62,8 @@ class Client(object):
 
     def __append_entities(self, entities1, entities2):
         entities_list = []
-        if "values" in entities2:
+        entities_check = entities2[0]
+        if "values" in entities_check:
             for entity1 in entities1:
                 entity = {}
                 for entity2 in entities2:
@@ -120,7 +121,7 @@ class Client(object):
                     entity_type["entityType"] = type1["entityType"]
                     entities1 = type1["entities"]
                     entities2 = type2["entities"]
-                    entity["entities"] = self.__append_entities(
+                    entity_type["entities"] = self.__append_entities(
                         entities1, entities2)
                     break
             if "entityType" in entity_type:
@@ -150,9 +151,9 @@ class Client(object):
                         types1, types2)
                     break
             if "attrName" in attr:
-                attr_list.append(attr)
+                attrs_list.append(attr)
             else:
-                attr_list.append(attr1)
+                attrs_list.append(attr1)
         for attr2 in attrs2:
             attr = {}
             for attr1 in attrs1:
@@ -160,7 +161,7 @@ class Client(object):
                     attr["attrName"] = attr2["attrName"]
                     break
             if "attrName" not in attr:
-                attr_list.append(attr2)
+                attrs_list.append(attr2)
         return sorted(attrs_list, key=lambda x: x["attrName"])
 
     def __append_response(self, response1, response2):
@@ -319,8 +320,8 @@ class Client(object):
                 loop_count = queries["limit"] // 10000
                 init_limit = queries["limit"] % 10000
                 queries["limit"] = init_limit
-                response = request.get(url, params=queries)
-                __append_response = resp.json()
+                response = requests.get(url, params=queries)
+                append_response = response.json()
                 if "offset" in queries:
                     queries["offset"] += queries["limit"]
                 else:
@@ -328,10 +329,19 @@ class Client(object):
                 queries["limit"] = 10000
                 for i in range(loop_count):
                     response = requests.get(url, params=queries)
-                    response_dict = response.json()
-                    append_response = self.__append_response(
-                        response_dict, append_response)
-                    queries["offset"] += queries["limit"]
+                    if response.status_code == 200:
+                        logger.info(
+                            f'status:{response.status_code}'
+                            'message: Successful response.')
+                        response_dict = response.json()
+                        append_response = self.__append_response(
+                            response_dict, append_response)
+                        queries["offset"] += queries["limit"]
+                    else:
+                        logger.info(
+                            f'status:{response.status_code}'
+                            'message: End roop')
+                        break
                 return append_response
 
     def __wrap_params(self, queries):
