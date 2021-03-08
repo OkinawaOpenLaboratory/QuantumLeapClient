@@ -297,7 +297,7 @@ class Client(object):
                     else:
                         logger.info(
                             f'status:{response.status_code}|'
-                            'message:End roop process')
+                            'message:End loop process')
                         break
                 return append_response
             elif queries["limit"] <= 10000:
@@ -340,7 +340,7 @@ class Client(object):
                     else:
                         logger.info(
                             f'status:{response.status_code}'
-                            'message: End roop')
+                            'message: End loop')
                         break
                 return append_response
 
