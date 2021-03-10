@@ -18,10 +18,10 @@ that helps QuantumLeap API calls.
 
 - Quantum Leap version > 0.7.6 
 - [NGSI v2](https://fiware.github.io/specifications/ngsiv2/stable) support
-- Handle [QuantumLeap API calls](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.7) in python
-- Handle python datetime object as a parameter
-- Get all the data stored in QuantumLeap without infinite loop processing
-- Allow visualization/debbugging facilities
+- Calls [QuantumLeap API](https://app.swaggerhub.com/apis/smartsdk/ngsi-tsdb/0.7) in python
+- Handle datetime object as a parameter
+- Get all historical data in QuantumLeap 
+- Allow visualization/debbugging feature.
 
 ## Usage
 
@@ -128,11 +128,6 @@ The QuantumLeapClient functions correspond to each [Quantum Leap API call](https
 
 QuantumLeap's API call P0ST / config hasn't been implemented yet, so post_config function
  isn't working properly.
-
-## Dependencies
-- logging
-- json
-- requests
 
 ## Licencse
 

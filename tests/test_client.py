@@ -126,3 +126,190 @@ class TestClient(TestCase):
         mock.return_value = self._mock_response(json_data=expected)
         result = self.client.get_entity(entity_id='Room1', limit=1)
         self.assertEqual(expected, result)
+
+    @mock.patch('requests.get')
+    def test_get_entity_value(self, mock):
+        expected = {'attributes': [{'attrName': 'pressure','values': ['720', '720', '720']},
+                                   {'attrName': 'temperature', 'values': ['23.0', '23.0', '23.0']}],
+                    'index': ['2021-03-02T04:58:27.203+00:00', '2021-03-02T04:58:27.203+00:00',
+                              '2021-03-02T04:58:27.203+00:00']}
+        response = {'attributes': [{'attrName': 'pressure','values': ['720']},
+                                   {'attrName': 'temperature', 'values': ['23.0']}],
+                    'index': ['2021-03-02T04:58:27.203+00:00']}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_entity_value(entity_id='Room1', limit=20000)
+        self.assertEqual(expected, result)
+
+    @mock.patch('requests.get')
+    def test_get_type_attribute(self, mock):
+        expected = {'attrName': 'temperature',
+                   'entities': [
+                       {'entityId': 'Room2',
+                        'index': ['2021-01-29T01:44:57.529+00:00',
+                                  '2021-01-29T01:44:57.529+00:00',
+                                  '2021-01-29T01:44:57.529+00:00'],
+                        'values': ['21', '21', '21']}],
+                   'entityType': 'Room'}
+        response = {'attrName': 'temperature',
+                   'entities': [
+                       {'entityId': 'Room2',
+                        'index': ['2021-01-29T01:44:57.529+00:00'],
+                        'values': ['21']}],
+                   'entityType': 'Room'}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_type_attribute(entity_type='Room', attr_name='temperature',
+                                                 limit=20000)
+        self.assertEqual(expected, result)
+
+    @mock.patch('requests.get')
+    def test_get_type_attribute_value(self, mock):
+        expected = {'values': [{'entityId': 'Room2',
+                                'index': ['2021-01-29T01:44:57.529+00:00',
+                                          '2021-01-29T01:44:57.529+00:00',
+                                          '2021-01-29T01:44:57.529+00:00'],
+                                'values': ['21', '21', '21']}]}
+        response = {'values': [{'entityId': 'Room2',
+                                'index': ['2021-01-29T01:44:57.529+00:00'],
+                                'values': ['21']}]}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_type_attribute_value(entity_type='Room', attr_name='temperature',
+                                                      limit=20000)
+        self.assertEqual(expected, result)
+
+    @mock.patch('requests.get')
+    def test_get_type(self, mock):
+        expected = {'entities': [{'attributes': [{'attrName': 'pressure',
+                                                  'values': ['711', '711', '711']},
+                                                 {'attrName': 'temperature',
+                                                  'values': ['21', '21', '21']}],
+                                  'entityId': 'Room2',
+                                  'index': ['2021-01-29T01:44:57.529+00:00',
+                                            '2021-01-29T01:44:57.529+00:00',
+                                            '2021-01-29T01:44:57.529+00:00']}],
+                    'entityType': 'Room'}
+        response = {'entities': [{'attributes': [{'attrName': 'pressure',
+                                                  'values': ['711']},
+                                                 {'attrName': 'temperature',
+                                                  'values': ['21']}],
+                                  'entityId': 'Room2',
+                                  'index': ['2021-01-29T01:44:57.529+00:00']}],
+                    'entityType': 'Room'}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_type(entity_type='Room', limit=20000)
+        self.assertEqual(expected, result)
+
+    @mock.patch('requests.get')
+    def test_get_type_value(self, mock):
+        expected = {'values': [{'attributes': [{'attrName': 'pressure',
+                                                'values': ['711', '711', '711']},
+                                               {'attrName': 'temperature',
+                                                'values': ['21', '21', '21']}],
+                                 'entityId': 'Room2',
+                                 'index': ['2021-01-29T01:44:57.529+00:00',
+                                           '2021-01-29T01:44:57.529+00:00',
+                                           '2021-01-29T01:44:57.529+00:00']}]}
+        response = {'values': [{'attributes': [{'attrName': 'pressure',
+                                                'values': ['711']},
+                                               {'attrName': 'temperature',
+                                                'values': ['21']}],
+                                 'entityId': 'Room2',
+                                 'index': ['2021-01-29T01:44:57.529+00:00']}]}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_type_value(entity_type='Room', limit=20000)
+        self.assertEqual(expected, result)
+
+    @mock.patch('requests.get')
+    def test_get_attribute(self, mock):
+        expected = {'attrName': 'temperature',
+                    'types': [{'entities': [{'entityId': 'Room2',
+                                             'index': ['2021-01-29T01:44:57.529+00:00',
+                                                       '2021-01-29T01:44:57.529+00:00',
+                                                       '2021-01-29T01:44:57.529+00:00'],
+                                             'values': ['21', '21', '21']}],
+                    'entityType': 'Room'}]}
+        response = {'attrName': 'temperature',
+                    'types': [{'entities': [{'entityId': 'Room2',
+                                             'index': ['2021-01-29T01:44:57.529+00:00'],
+                                             'values': ['21']}],
+                    'entityType': 'Room'}]}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_attribute(attr_name='temperature', limit=20000)
+        self.assertEqual(expected, result)
+
+    @mock.patch('requests.get')
+    def test_get_attribute_value(self, mock):
+        expected = {'values': [{'entities': [{'entityId': 'Room2',
+                                             'index': ['2021-01-29T01:44:57.529+00:00',
+                                                       '2021-01-29T01:44:57.529+00:00',
+                                                       '2021-01-29T01:44:57.529+00:00'],
+                                             'values': ['21', '21', '21']}],
+                    'entityType': 'Room'}]}
+        response = {'values': [{'entities': [{'entityId': 'Room2',
+                                             'index': ['2021-01-29T01:44:57.529+00:00'],
+                                             'values': ['21']}],
+                    'entityType': 'Room'}]}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_attribute_value(attr_name='temperature', limit=20000)
+        self.assertEqual(expected, result)
+
+
+    @mock.patch('requests.get')
+    def test_get_attrs(self, mock):
+        expected = {'attrs': [{'attrName': 'pressure',
+                               'types': [{'entities': [{'entityId': 'Room2',
+                                                        'index': ['2021-01-29T01:44:57.529+00:00',
+                                                                  '2021-01-29T01:44:57.529+00:00',
+                                                                  '2021-01-29T01:44:57.529+00:00'],
+                                                        'values': ['711', '711', '711']}],
+                                                        'entityType': 'Room'}]},
+                              {'attrName': 'temperature',
+                               'types': [{'entities': [{'entityId': 'Room2',
+                                                        'index': ['2021-01-29T01:44:57.529+00:00',
+                                                                  '2021-01-29T01:44:57.529+00:00',
+                                                                  '2021-01-29T01:44:57.529+00:00'],
+                                                        'values': ['21', '21', '21']}],
+                                                        'entityType': 'Room'}]}]}
+        response = {'attrs': [{'attrName': 'pressure',
+                               'types': [{'entities': [{'entityId': 'Room2',
+                                                        'index': ['2021-01-29T01:44:57.529+00:00'],
+                                                        'values': ['711']}],
+                                                        'entityType': 'Room'}]},
+                              {'attrName': 'temperature',
+                               'types': [{'entities': [{'entityId': 'Room2',
+                                                        'index': ['2021-01-29T01:44:57.529+00:00'],
+                                                        'values': ['21']}],
+                                                        'entityType': 'Room'}]}]}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_attrs(limit=20000)
+        self.assertEqual(expected, result)
+
+    @mock.patch('requests.get')
+    def test_get_attrs_value(self, mock):
+        expected = {'values': [{'attrName': 'pressure',
+                               'types': [{'entities': [{'entityId': 'Room2',
+                                                        'index': ['2021-01-29T01:44:57.529+00:00',
+                                                                  '2021-01-29T01:44:57.529+00:00',
+                                                                  '2021-01-29T01:44:57.529+00:00'],
+                                                        'values': ['711', '711', '711']}],
+                                                        'entityType': 'Room'}]},
+                              {'attrName': 'temperature',
+                               'types': [{'entities': [{'entityId': 'Room2',
+                                                        'index': ['2021-01-29T01:44:57.529+00:00',
+                                                                  '2021-01-29T01:44:57.529+00:00',
+                                                                  '2021-01-29T01:44:57.529+00:00'],
+                                                        'values': ['21', '21', '21']}],
+                                                        'entityType': 'Room'}]}]}
+        response = {'values': [{'attrName': 'pressure',
+                               'types': [{'entities': [{'entityId': 'Room2',
+                                                        'index': ['2021-01-29T01:44:57.529+00:00'],
+                                                        'values': ['711']}],
+                                                        'entityType': 'Room'}]},
+                              {'attrName': 'temperature',
+                               'types': [{'entities': [{'entityId': 'Room2',
+                                                        'index': ['2021-01-29T01:44:57.529+00:00'],
+                                                        'values': ['21']}],
+                                                        'entityType': 'Room'}]}]}
+        mock.return_value = self._mock_response(json_data=response)
+        result = self.client.get_attrs_value(limit=20000)
+        self.assertEqual(expected, result)
+
