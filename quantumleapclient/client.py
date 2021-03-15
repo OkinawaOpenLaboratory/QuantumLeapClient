@@ -24,12 +24,6 @@ class Client(object):
         logging.basicConfig(level=log_level, format=fmt)
         logger.info(f'base_url = {self.base_url}')
 
-    def __append_index(self, index1, index2):
-        index_list = []
-        index_list.extend(index1)
-        index_list.extend(index2)
-        return index_list
-
     def __append_values(self, values1, values2):
         values_list = []
         values_list.extend(values1)
@@ -69,7 +63,7 @@ class Client(object):
                 for entity2 in entities2:
                     if entity1["entityId"] == entity2["entityId"]:
                         entity["entityId"] = entity1["entityId"]
-                        entity["index"] = self.__append_index(
+                        entity["index"] = self.__append_values(
                             entity1["index"], entity2["index"])
                         entity["values"] = self.__append_values(
                             entity1["values"], entity2["values"])
@@ -91,12 +85,11 @@ class Client(object):
                 entity = {}
                 for entity2 in entities2:
                     if entity1["entityId"] == entity2["entityId"]:
-                        entity["entitytId"] = entity1["entityId"]
-                        entity["index"] = self.__append_index(
-                            entity1["index"], entity2["index"])
                         entity["attributes"] = self.__append_attributes(
-                            entity1["attributes"],
-                            entity2["attributes"])
+                            entity1["attributes"], entity2["attributes"])
+                        entity["entityId"] = entity1["entityId"]
+                        entity["index"] = self.__append_values(
+                            entity1["index"], entity2["index"])
                         break
                 if "entityId" in entity:
                     entities_list.append(entity)
@@ -172,7 +165,7 @@ class Client(object):
             __append_response["entityId"] = response1["entityId"]
         if "index" in response1:
             if "index" in response2:
-                __append_response["index"] = self.__append_index(
+                __append_response["index"] = self.__append_values(
                     response1["index"], response2["index"])
             else:
                 __append_response["index"] = response1["index"]
@@ -321,7 +314,8 @@ class Client(object):
                 init_limit = queries["limit"] % 10000
                 queries["limit"] = init_limit
                 response = requests.get(url, params=queries)
-                append_response = response.json()
+                if response.status_code == 200:
+                    append_response = response.json()
                 if "offset" in queries:
                     queries["offset"] += queries["limit"]
                 else:
@@ -513,7 +507,7 @@ class Client(object):
     def get_type_attribute_value(self, entity_type: str,
                                  attr_name: str, **kwargs):
         logger.info("start get_type_attribute_value function")
-        url = f'{self.base_url}/types/{entity_type}/attrs/{attr_name}value'
+        url = f'{self.base_url}/types/{entity_type}/attrs/{attr_name}/value'
         params = self.__wrap_params(queries=kwargs)
         response = self._do_request(method='GET', url=url, queries=params)
         return response
