@@ -41,7 +41,7 @@ Create and register time series data using QuantumLeapClient.
 
 ```python
 body = {}
-body["subscription_id"] = "5947d174793fe6f7eb5e3961" # Rondom value
+body["subscription_id"] = "5947d174793fe6f7eb5e3961" # Random value
 entity = {}
 entity["id"] = "Room1"
 entity["type"] = "Room"
